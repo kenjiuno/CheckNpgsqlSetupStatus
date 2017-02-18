@@ -76,3 +76,10 @@ The following one shows: type attribute is missing.
 The following one shows: add element may be missing.
 
 ![NoAdd](https://raw.githubusercontent.com/kenjiuno/CheckNpgsqlSetupStatus/master/_NoAdd.png)
+
+PowerShell: Package Manager Console in Visual Studio 2013
+=========================================================
+
+```
+(new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/kenjiuno/CheckNpgsqlSetupStatus/master/CheckNpgsqlStatus.ps1") | iex ; CheckNpgsqlStatus
+```
