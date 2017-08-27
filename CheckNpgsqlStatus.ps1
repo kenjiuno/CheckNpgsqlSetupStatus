@@ -1,4 +1,4 @@
-﻿# CheckNpgsqlStatus by kenjiuno
+# CheckNpgsqlStatus by kenjiuno
 # Runs great on Package Manager Console in Visual Studio 2013
 
 # (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/kenjiuno/CheckNpgsqlSetupStatus/master/CheckNpgsqlStatus.ps1") | iex
@@ -49,7 +49,17 @@ function GetProjectProperty
 
 function CheckNpgsqlStatus
 {
-    Write-Host "Npgsql from DbProviderFactories.GetFactory:"
+    Write-Host "## DbProviderFactories.GetFactoryClasses" -ForegroundColor Green
+    Write-Host "``````" -ForegroundColor DarkGreen
+    [System.Data.Common.DbProviderFactories]::GetFactoryClasses() | Out-String -Stream | Write-Host -ForegroundColor DarkGreen
+    Write-Host "``````" -ForegroundColor DarkGreen
+    
+    Write-Host "## GetSection system.data/DbProviderFactories" -ForegroundColor Green
+    Write-Host "``````" -ForegroundColor DarkGreen
+    [System.Configuration.ConfigurationManager]::GetSection("system.data").Tables["DbProviderFactories"] | Out-String -Stream | Write-Host -ForegroundColor DarkGreen
+    Write-Host "``````" -ForegroundColor DarkGreen
+
+    Write-Host "## Npgsql from DbProviderFactories.GetFactory" -ForegroundColor Green
     try {
         $npgsqlAssembly = [System.Data.Common.DbProviderFactories]::GetFactory("Npgsql").GetType().Assembly
         Write-Host " " $npgsqlAssembly.FullName -ForegroundColor DarkGreen
@@ -59,8 +69,7 @@ function CheckNpgsqlStatus
         Write-Host " " "Not available!" -ForegroundColor Red
     }
 
-
-    Write-Host "Npgsql in active project:"
+    Write-Host "## Npgsql in active project" -ForegroundColor Green
     $found = $false
     $project = Get-Project
     if ($project) {
@@ -71,9 +80,17 @@ function CheckNpgsqlStatus
             if ($vsproject2 -and $vsproject2.References) {
                 foreach ($reference in $vsproject2.References) {
                     if ("Npgsql" -ieq $reference.Identity) {
+                        $filePathNpgsql = $reference.Path
+                        $verNpgsql = [System.Reflection.AssemblyName]::GetAssemblyName($filePathNpgsql).ToString()
+                        Write-Host "- Real assembly version:" -ForegroundColor Green
+                        Write-Host " " $verNpgsql -ForegroundColor DarkGreen
+                        Write-Host " " $reference.Path -ForegroundColor DarkGreen
+
+                        Write-Host "- Actually loaded version where bindingRedirect affects:" -ForegroundColor Green
                         $projectNpgsqlAssembly = [System.Reflection.Assembly]::LoadFile($reference.Path)
                         Write-Host " " $projectNpgsqlAssembly.FullName -ForegroundColor DarkGreen
                         Write-Host " " $projectNpgsqlAssembly.Location -ForegroundColor DarkGreen
+
                         $found = $true
                     }
                 }
@@ -90,7 +107,7 @@ function CheckNpgsqlStatus
         Write-Host " " "No active project!" -ForegroundColor Red
     }
 
-    Write-Host "Npgsql in OutputPath:"
+    Write-Host "## Npgsql in OutputPath" -ForegroundColor Green
     $found = $false
     $project = Get-Project
     if ($project) {
@@ -100,9 +117,16 @@ function CheckNpgsqlStatus
             $OutputPath = $project.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value
             $filePathNpgsql = Join-Path (Join-Path $FullPath $OutputPath) "Npgsql.dll"
             if (Test-Path $filePathNpgsql) {
-                $verNpgsql = [System.Reflection.AssemblyName]::GetAssemblyName($filePathNpgsql).Version;
+                $verNpgsql = [System.Reflection.AssemblyName]::GetAssemblyName($filePathNpgsql).ToString()
+                Write-Host "- Real assembly version:" -ForegroundColor Green
                 Write-Host " " $verNpgsql -ForegroundColor DarkGreen
                 Write-Host " " $filePathNpgsql -ForegroundColor DarkGreen
+
+                Write-Host "- Actually loaded version where bindingRedirect affects:" -ForegroundColor Green
+                $projectNpgsqlAssembly = [System.Reflection.Assembly]::LoadFile($filePathNpgsql)
+                Write-Host " " $projectNpgsqlAssembly.FullName -ForegroundColor DarkGreen
+                Write-Host " " $projectNpgsqlAssembly.Location -ForegroundColor DarkGreen
+
                 $found = $true
             }
             else {
