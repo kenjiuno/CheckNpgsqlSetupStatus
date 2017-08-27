@@ -49,14 +49,17 @@ function GetProjectProperty
 
 function CheckNpgsqlStatus
 {
-    Write-Host "## DbProviderFactories.GetFactoryClasses" -ForegroundColor Green
-    Write-Host "``````" -ForegroundColor DarkGreen
-    [System.Data.Common.DbProviderFactories]::GetFactoryClasses() | Out-String -Stream | Write-Host -ForegroundColor DarkGreen
-    Write-Host "``````" -ForegroundColor DarkGreen
-    
+    Write-Host "## Host" -ForegroundColor Green
+    $DTE.Name + " " + $DTE.Version + " " + $DTE.Edition | Out-String -Stream | Write-Host -ForegroundColor DarkGreen
+
     Write-Host "## GetSection system.data/DbProviderFactories" -ForegroundColor Green
     Write-Host "``````" -ForegroundColor DarkGreen
     [System.Configuration.ConfigurationManager]::GetSection("system.data").Tables["DbProviderFactories"] | Out-String -Stream | Write-Host -ForegroundColor DarkGreen
+    Write-Host "``````" -ForegroundColor DarkGreen
+
+    Write-Host "## DbProviderFactories.GetFactoryClasses" -ForegroundColor Green
+    Write-Host "``````" -ForegroundColor DarkGreen
+    [System.Data.Common.DbProviderFactories]::GetFactoryClasses() | Out-String -Stream | Write-Host -ForegroundColor DarkGreen
     Write-Host "``````" -ForegroundColor DarkGreen
 
     Write-Host "## Npgsql from DbProviderFactories.GetFactory" -ForegroundColor Green
